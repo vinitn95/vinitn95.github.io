@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Self-Driving Ops Team — Vinit Nair</title>
+<meta name="description" content="What happens when a five-person operations team learns to run itself. A working log from HeyMax by Vinit Nair.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0F1011;
+  --gray:#5C6165;
+  --gray-light:#9AA0A4;
+  --line:#E8E9EA;
+  --fill-gray:#D9DBDC;
+  --orange:#ED6B40;
+  --bg:#FFFFFF;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{background:var(--bg);color:var(--ink);font-family:'Inter',sans-serif;font-size:19px;line-height:1.65;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+a:focus-visible{outline:2px solid var(--orange);outline-offset:3px;border-radius:2px}
+
+nav{border-bottom:1px solid var(--line)}
+.nav-in{max-width:1100px;margin:0 auto;padding:0 24px;height:62px;display:flex;align-items:center;justify-content:space-between}
+.brand{font-weight:800;font-size:15px;letter-spacing:-.01em;text-decoration:none}
+.brand span{color:var(--orange)}
+.nav-links{display:flex;gap:24px;list-style:none}
+.nav-links a{font-size:14px;font-weight:500;color:var(--gray);text-decoration:none}
+.nav-links a:hover{color:var(--ink)}
+
+.prose{max-width:700px;margin:0 auto;padding:0 24px}
+.wide{max-width:980px;margin:0 auto;padding:0 24px}
+
+header{padding:72px 0 8px}
+.kicker{font-size:13px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--orange);margin-bottom:20px}
+h1{font-weight:900;font-size:clamp(38px,6vw,64px);line-height:1.02;letter-spacing:-.03em}
+.dek{margin-top:22px;font-size:clamp(19px,2.4vw,24px);line-height:1.45;color:var(--gray);font-weight:400}
+.byline{margin-top:28px;padding-top:20px;border-top:1px solid var(--line);display:flex;gap:10px;flex-wrap:wrap;font-size:14px;color:var(--gray)}
+.byline b{color:var(--ink);font-weight:600}
+.byline .sep{color:var(--gray-light)}
+
+article{padding:40px 0 20px}
+article p{margin:0 0 26px;color:#26292B}
+article p b{font-weight:600;color:var(--ink)}
+h2{font-weight:800;font-size:clamp(24px,3.4vw,32px);letter-spacing:-.02em;line-height:1.15;margin:64px 0 24px}
+.lead-stat{color:var(--orange);font-weight:700}
+
+figure{margin:44px auto 48px}
+.fig-title{font-weight:800;font-size:clamp(21px,2.8vw,27px);letter-spacing:-.02em;line-height:1.2}
+.fig-sub{margin-top:6px;font-size:15.5px;color:var(--gray)}
+.legend{display:flex;justify-content:center;gap:26px;margin:24px 0 4px;font-size:14px;font-weight:500;color:var(--ink)}
+.lg{display:inline-flex;align-items:center;gap:7px}
+.lg i{display:inline-block;width:22px;height:0;border-top:2px solid;position:relative}
+.lg i::after{content:"";position:absolute;left:8px;top:-4px;width:6px;height:6px;border-radius:50%;background:#fff;border:2px solid}
+.lg.gray i{border-color:var(--ink)}
+.lg.gray i::after{border-color:var(--ink)}
+.lg.orange i{border-color:var(--orange)}
+.lg.orange i::after{border-color:var(--orange)}
+figure svg{width:100%;height:auto;display:block}
+figcaption{margin-top:12px;font-size:13.5px;color:var(--gray-light);text-align:center}
+
+.statfig{text-align:center;padding:34px 24px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.statfig .big{font-weight:900;font-size:clamp(52px,9vw,88px);letter-spacing:-.03em;color:var(--orange);line-height:1}
+.statfig .cap{margin-top:10px;font-size:16px;color:var(--gray)}
+.statrow{display:flex;gap:0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.statrow .cell{flex:1;text-align:center;padding:30px 16px}
+.statrow .cell+.cell{border-left:1px solid var(--line)}
+.statrow .big{font-weight:900;font-size:clamp(34px,5vw,54px);letter-spacing:-.03em;color:var(--orange);line-height:1}
+.statrow .cap{margin-top:8px;font-size:14.5px;color:var(--gray)}
+
+/* 2x2 decision matrix */
+.matrix{display:grid;grid-template-columns:44px 1fr 1fr;grid-template-rows:1fr 1fr 44px;gap:0;max-width:760px;margin:0 auto}
+.ax-y{grid-row:1 / 3;display:flex;align-items:center;justify-content:center}
+.ax-y span{transform:rotate(180deg);writing-mode:vertical-rl;font-size:13px;font-weight:600;color:var(--gray);letter-spacing:.04em}
+.ax-x{grid-column:2 / 4;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:var(--gray);letter-spacing:.04em;padding-top:12px}
+.quad{border:1px solid var(--line);padding:26px 24px;min-height:150px}
+.quad.q1{border-radius:12px 0 0 0}
+.quad.q2{border-radius:0 12px 0 0;margin-left:-1px}
+.quad.q3{border-radius:0 0 0 12px;margin-top:-1px}
+.quad.q4{border-radius:0 0 12px 0;margin-left:-1px;margin-top:-1px}
+.quad.handoff{background:#FDF1EC;border-color:#F3C4AE;position:relative;z-index:1}
+.quad .verdict{font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}
+.quad.handoff .verdict{color:var(--orange)}
+.quad.keep .verdict{color:var(--gray)}
+.quad.mute{background:#FAFAFA}
+.quad.mute .verdict{color:var(--gray-light)}
+.quad .who{margin-top:8px;font-weight:700;font-size:16px;letter-spacing:-.01em}
+.quad .why{margin-top:8px;font-size:15px;line-height:1.5;color:var(--gray)}
+@media(max-width:720px){.quad{min-height:0;padding:18px 14px}.quad .who{font-size:14px}.quad .why{font-size:12.5px}}
+
+/* pipeline */
+.pipe{border:1px solid var(--line);border-radius:12px;padding:28px 26px 22px;overflow-x:auto;background:#FCFCFC}
+.pipe-label{font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gray);margin-bottom:18px;display:flex;justify-content:space-between;gap:12px;min-width:600px}
+.pipe-label .live{color:var(--orange)}
+.pipe-row{display:flex;min-width:600px}
+.stage{flex:1;position:relative;padding:14px 12px 12px;border:1px solid var(--line);border-radius:8px;background:#fff}
+.stage+.stage{margin-left:32px}
+.stage::before{content:"";position:absolute;left:-32px;top:50%;width:32px;height:1px;background:var(--line)}
+.stage::after{content:"";position:absolute;left:-8px;top:50%;transform:translateY(-50%) rotate(45deg);width:5px;height:5px;border-top:1.5px solid var(--gray-light);border-right:1.5px solid var(--gray-light)}
+.stage:first-child::before,.stage:first-child::after{display:none}
+.st-name{font-size:13px;font-weight:700;letter-spacing:.02em}
+.st-sub{font-size:12px;color:var(--gray);margin-top:3px;line-height:1.4}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--ink);display:inline-block;margin-right:7px}
+.stage.gate{background:#FDF1EC;border-color:#F3C4AE}
+.stage.gate .dot{background:var(--orange)}
+
+.cols{display:grid;grid-template-columns:repeat(3,1fr);gap:26px;margin:36px 0}
+.col h4{font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--orange);margin-bottom:10px}
+.col p{font-size:15.5px;color:#26292B;margin:0}
+
+.cta{margin:56px 0 0;padding:40px;border:1px solid var(--line);border-radius:14px;background:#FCFCFC;text-align:center}
+.cta h3{font-weight:800;font-size:24px;letter-spacing:-.02em}
+.cta p{margin:12px auto 24px;max-width:52ch;color:var(--gray);font-size:16px}
+.btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+.btn{display:inline-block;padding:12px 26px;border-radius:8px;font-size:15px;font-weight:600;text-decoration:none}
+.btn.primary{background:var(--ink);color:#fff}
+.btn.primary:hover{background:#000}
+.btn.ghost{border:1px solid var(--line);color:var(--ink)}
+.btn.ghost:hover{border-color:var(--ink)}
+
+footer{margin-top:80px;border-top:1px solid var(--line);padding:36px 0 56px}
+.foot-in{max-width:1100px;margin:0 auto;padding:0 24px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:14px;color:var(--gray)}
+
+@media(max-width:720px){
+  body{font-size:17px}
+  .cols{grid-template-columns:1fr}
+  .statrow{flex-direction:column}
+  .statrow .cell+.cell{border-left:none;border-top:1px solid var(--line)}
+  .nav-links{display:none}
+  header{padding:48px 0 8px}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-in">
+    <a class="brand" href="#top">vinit<span>.</span>nair</a>
+    <ul class="nav-links">
+      <li><a href="#autopilot">autopilot</a></li>
+      <li><a href="#framework">framework</a></li>
+      <li><a href="#trust">cx design</a></li>
+      <li><a href="#checklist">daily ops</a></li>
+      <li><a href="#next">contact</a></li>
+    </ul>
+  </div>
+</nav>
+
+<header id="top">
+  <div class="prose">
+    <p class="kicker">A working log from HeyMax</p>
+    <h1>The self-driving ops team</h1>
+    <p class="dek">What happens when a five-person operations team learns to run itself.</p>
+    <div class="byline">
+      <b>Vinit Nair</b><span class="sep">·</span><span>Head of Operations, HeyMax</span><span class="sep">·</span><span>Singapore</span><span class="sep">·</span><span>Updated Aug 2026</span>
+    </div>
+  </div>
+</header>
+
+<article>
+  <div class="prose">
+    <p>A five-person operations team at HeyMax — SEA's fastest-growing loyalty fintech — runs a <b>$5M+ GMV</b> commerce business across voucher inventory, affiliate deals, and merchant escalations. Over the past year we removed <span class="lead-stat">300+ hours</span> of manual work a month. Campaign volume more than doubled. Defects per campaign fell.</p>
+    <p>Underneath it: agents that draft campaign deliverables, validate each other's work against versioned specs, and stop the line when something looks wrong, with a human accountable at every launch.</p>
+    <p>I'm Vinit. I run operations at HeyMax and built this system myself, with Claude, a custom MCP server, and n8n.</p>
+
+    <h2 id="autopilot">AI agents for campaign operations</h2>
+    <p>Every merchant campaign — voucher drops, tiered upsizes, partner promos — needed manual coordination across briefs, assets, validation, and launch. Growth meant hiring more coordinators or building a system that runs the process itself.</p>
+    <p>We built <b>Fulfilment Autopilot</b>: campaign briefs arrive through structured intake, a builder agent drafts every deliverable from versioned skill documents, an independent validator agent checks the output, and a compulsory Go/No-Go gate keeps a human accountable for every launch. It runs on a <b>104-function MCP server</b>, orchestrated with n8n, with Linear as the system of record. Roughly <b>30% of campaign projects now run in the auto lane</b>, and that share is roughly doubling month over month.</p>
+  </div>
+
+  <div class="wide">
+    <figure>
+      <div class="pipe" role="img" aria-label="Agent pipeline: intake, builder agent, validator agent, go/no-go gate, launch">
+        <div class="pipe-label"><span>Fulfilment Autopilot — campaign ops pipeline</span><span class="live">● in production</span></div>
+        <div class="pipe-row">
+          <div class="stage"><div class="st-name"><span class="dot"></span>INTAKE</div><div class="st-sub">structured brief from BD form</div></div>
+          <div class="stage"><div class="st-name"><span class="dot"></span>BUILDER</div><div class="st-sub">agent drafts campaign assets</div></div>
+          <div class="stage"><div class="st-name"><span class="dot"></span>VALIDATOR</div><div class="st-sub">second agent checks against skill spec</div></div>
+          <div class="stage gate"><div class="st-name"><span class="dot"></span>GO / NO-GO</div><div class="st-sub">compulsory human gate</div></div>
+          <div class="stage"><div class="st-name"><span class="dot"></span>LAUNCH</div><div class="st-sub">live, tracked, auditable</div></div>
+        </div>
+      </div>
+    </figure>
+  </div>
+
+  <div class="prose">
+    <p>We started piloting agents for campaign setup at the end of March. The curve didn't jump — it compounded: campaign launches held around 50–60 a month through the first half of the year, then hit <b>76 in June</b> and <b>122 in July</b>, even as agents started taking on more complex campaigns from mid-June. Same five people.</p>
+  </div>
+
+  <div class="wide">
+    <figure>
+      <div class="fig-title">The same team is shipping more campaigns</div>
+      <div class="fig-sub">Campaign projects shipped per month, Jan–Aug 2026 · same team of five</div>
+      <svg viewBox="0 0 920 420" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Monthly campaigns shipped: around 50 to 60 per month January through May, 76 in June, 122 in July, 67 in August month to date. Agents took on campaign setup from March.">
+        <defs>
+          <clipPath id="preClip"><rect x="0" y="0" width="362.9" height="420"/></clipPath>
+          <clipPath id="midClip"><rect x="362.9" y="0" width="292.8" height="420"/></clipPath>
+          <clipPath id="postClip"><rect x="655.7" y="0" width="270" height="420"/></clipPath>
+        </defs>
+        <line x1="70" y1="370" x2="890" y2="370" stroke="#E8E9EA" stroke-width="1"/>
+        <line x1="70" y1="275.7" x2="890" y2="275.7" stroke="#E8E9EA" stroke-width="1" stroke-dasharray="1 5" stroke-linecap="round"/>
+        <line x1="70" y1="181.4" x2="890" y2="181.4" stroke="#E8E9EA" stroke-width="1" stroke-dasharray="1 5" stroke-linecap="round"/>
+        <line x1="70" y1="87.1" x2="890" y2="87.1" stroke="#E8E9EA" stroke-width="1" stroke-dasharray="1 5" stroke-linecap="round"/>
+        <text x="58" y="374" font-family="Inter" font-size="13" fill="#9AA0A4" text-anchor="end">0</text>
+        <text x="58" y="279.7" font-family="Inter" font-size="13" fill="#9AA0A4" text-anchor="end">40</text>
+        <text x="58" y="185.4" font-family="Inter" font-size="13" fill="#9AA0A4" text-anchor="end">80</text>
+        <text x="58" y="91.1" font-family="Inter" font-size="13" fill="#9AA0A4" text-anchor="end">120</text>
+        <!-- area: gray pre-March, orange post -->
+        <path clip-path="url(#preClip)" d="M70.0,256.9 C109.0,250.6 148.1,242.3 187.1,238.0 C226.2,233.7 265.2,230.9 304.3,230.9 C343.3,230.9 382.4,230.9 421.4,230.9 C460.5,230.9 499.5,252.1 538.6,252.1 C577.6,252.1 616.7,219.1 655.7,190.9 C694.8,162.6 733.8,82.4 772.9,82.4 C811.9,82.4 851.0,168.9 890.0,212.1 L890.0,370 L70.0,370 Z" fill="#D9DBDC"/>
+        <path clip-path="url(#midClip)" d="M70.0,256.9 C109.0,250.6 148.1,242.3 187.1,238.0 C226.2,233.7 265.2,230.9 304.3,230.9 C343.3,230.9 382.4,230.9 421.4,230.9 C460.5,230.9 499.5,252.1 538.6,252.1 C577.6,252.1 616.7,219.1 655.7,190.9 C694.8,162.6 733.8,82.4 772.9,82.4 C811.9,82.4 851.0,168.9 890.0,212.1 L890.0,370 L70.0,370 Z" fill="#ED6B40"/>
+        <path clip-path="url(#postClip)" d="M70.0,256.9 C109.0,250.6 148.1,242.3 187.1,238.0 C226.2,233.7 265.2,230.9 304.3,230.9 C343.3,230.9 382.4,230.9 421.4,230.9 C460.5,230.9 499.5,252.1 538.6,252.1 C577.6,252.1 616.7,219.1 655.7,190.9 C694.8,162.6 733.8,82.4 772.9,82.4 C811.9,82.4 851.0,168.9 890.0,212.1 L890.0,370 L70.0,370 Z" fill="#C93A2B"/>
+        <path clip-path="url(#preClip)" d="M70.0,256.9 C109.0,250.6 148.1,242.3 187.1,238.0 C226.2,233.7 265.2,230.9 304.3,230.9 C343.3,230.9 382.4,230.9 421.4,230.9 C460.5,230.9 499.5,252.1 538.6,252.1 C577.6,252.1 616.7,219.1 655.7,190.9 C694.8,162.6 733.8,82.4 772.9,82.4 C811.9,82.4 851.0,168.9 890.0,212.1" fill="none" stroke="#0F1011" stroke-width="1.6"/>
+        <!-- annotations -->
+        <line x1="362.9" y1="52" x2="362.9" y2="370" stroke="#9AA0A4" stroke-width="1" stroke-dasharray="4 4"/>
+        <text x="370.7" y="66" font-family="Inter" font-size="12" font-weight="700" fill="#26292B">Started to pilot agents for campaign setup</text>
+        <line x1="655.7" y1="52" x2="655.7" y2="370" stroke="#9AA0A4" stroke-width="1" stroke-dasharray="4 4"/>
+        <text x="663" y="66" font-family="Inter" font-size="12" font-weight="700" fill="#26292B">Agents take on more complex campaigns</text>
+        <!-- peak label -->
+        <!-- x labels -->
+        <text x="70" y="398" font-family="Inter" font-size="13" fill="#9AA0A4" text-anchor="middle">Jan</text>
+        <text x="187.1" y="398" font-family="Inter" font-size="13" fill="#9AA0A4" text-anchor="middle">Feb</text>
+        <text x="304.3" y="398" font-family="Inter" font-size="13" fill="#9AA0A4" text-anchor="middle">Mar</text>
+        <text x="421.4" y="398" font-family="Inter" font-size="13" fill="#9AA0A4" text-anchor="middle">Apr</text>
+        <text x="538.6" y="398" font-family="Inter" font-size="13" fill="#9AA0A4" text-anchor="middle">May</text>
+        <text x="655.7" y="398" font-family="Inter" font-size="13" fill="#9AA0A4" text-anchor="middle">Jun</text>
+        <text x="772.9" y="398" font-family="Inter" font-size="13" fill="#9AA0A4" text-anchor="middle">Jul</text>
+        <text x="918" y="398" font-family="Inter" font-size="13" fill="#9AA0A4" text-anchor="end">Aug (MTD)</text>
+      </svg>
+    </figure>
+  </div>
+
+  <div class="prose">
+    <p>We audit every launch afterwards against launch records. Each thing the gates stop is logged, resolved, and folded back into the skill specs the agents build from, so the same mistake doesn't need catching twice.</p>
+  </div>
+
+  <div class="wide">
+    <figure>
+      <div class="fig-title">Every catch becomes an improvement to the process</div>
+      <div class="fig-sub">Improvements incorporated from agent gates — each one a defect that never reached a customer</div>
+      <div class="legend">
+        <span class="lg orange"><i></i>Cumulative improvements incorporated</span>
+      </div>
+      <svg viewBox="0 0 920 420" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Cumulative improvements incorporated from agent gates, rising to 16 across the audited campaigns">
+        <line x1="70" y1="370" x2="890" y2="370" stroke="#E8E9EA" stroke-width="1"/>
+        <line x1="70" y1="260" x2="890" y2="260" stroke="#E8E9EA" stroke-width="1" stroke-dasharray="1 5" stroke-linecap="round"/>
+        <line x1="70" y1="150" x2="890" y2="150" stroke="#E8E9EA" stroke-width="1" stroke-dasharray="1 5" stroke-linecap="round"/>
+        <line x1="70" y1="40" x2="890" y2="40" stroke="#E8E9EA" stroke-width="1" stroke-dasharray="1 5" stroke-linecap="round"/>
+        <text x="58" y="374" font-family="Inter" font-size="13" fill="#9AA0A4" text-anchor="end">0</text>
+        <text x="58" y="264" font-family="Inter" font-size="13" fill="#9AA0A4" text-anchor="end">8</text>
+        <text x="58" y="154" font-family="Inter" font-size="13" fill="#9AA0A4" text-anchor="end">16</text>
+        <text x="58" y="44" font-family="Inter" font-size="13" fill="#9AA0A4" text-anchor="end">24</text>
+        <path d="M70.0,342.5 C94.8,328.8 119.7,301.2 144.5,301.2 C169.4,301.2 194.2,301.2 219.1,301.2 C243.9,301.2 268.8,301.2 293.6,301.2 C318.5,301.2 343.3,296.7 368.2,287.5 C393.0,278.3 417.9,246.2 442.7,246.2 C467.6,246.2 492.4,246.2 517.3,246.2 C542.1,246.2 567.0,239.4 591.8,232.5 C616.7,225.6 641.5,211.9 666.4,205.0 C691.2,198.1 716.1,195.8 740.9,191.2 C765.8,186.7 790.6,184.4 815.5,177.5 C840.3,170.6 865.2,159.2 890.0,150.0 L890.0,370 L70.0,370 Z" fill="#ED6B40"/>
+        <path d="M70.0,342.5 C94.8,328.8 119.7,301.2 144.5,301.2 C169.4,301.2 194.2,301.2 219.1,301.2 C243.9,301.2 268.8,301.2 293.6,301.2 C318.5,301.2 343.3,296.7 368.2,287.5 C393.0,278.3 417.9,246.2 442.7,246.2 C467.6,246.2 492.4,246.2 517.3,246.2 C542.1,246.2 567.0,239.4 591.8,232.5 C616.7,225.6 641.5,211.9 666.4,205.0 C691.2,198.1 716.1,195.8 740.9,191.2 C765.8,186.7 790.6,184.4 815.5,177.5 C840.3,170.6 865.2,159.2 890.0,150.0" fill="none" stroke="#C93A2B" stroke-width="2"/>
+        <circle cx="890" cy="150" r="4" fill="#fff" stroke="#C93A2B" stroke-width="2.5"/>
+        <text x="884" y="136" font-family="Inter" font-size="14" font-weight="700" fill="#C93A2B" text-anchor="end">16 improvements</text>
+        <text x="70" y="398" font-family="Inter" font-size="13" fill="#9AA0A4" text-anchor="middle">4</text>
+        <text x="517.3" y="398" font-family="Inter" font-size="13" fill="#9AA0A4" text-anchor="middle">10</text>
+        <text x="890" y="398" font-family="Inter" font-size="13" fill="#9AA0A4" text-anchor="middle">15</text>
+        <text x="480" y="416" font-family="Inter" font-size="12" fill="#9AA0A4" text-anchor="middle">campaign</text>
+      </svg>
+    </figure>
+  </div>
+
+  <div class="prose">
+    <p>Before Autopilot, campaigns escaped roughly <b>0.6–0.7 defects each</b>. With the gates live that rate fell and stayed down, trending lower for ten straight campaigns before a single launch put three escapes into production and pulled it back to <b>0.40</b>. The regression is in the data on purpose: the audit exists to catch it, and the postmortem feeds the validator's spec.</p>
+  </div>
+
+  <div class="wide">
+    <figure>
+      <div class="fig-title">Escapes fell against the pre-Autopilot baseline</div>
+      <div class="fig-sub">Escaped defects per campaign, before and after the gates went live</div>
+      <div class="legend">
+        <span class="lg gray"><i></i>Escaped defects per campaign</span>
+      </div>
+      <svg viewBox="0 0 920 420" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Before Autopilot, escaped defects ran around 0.6 to 0.7 per campaign. Across the audited cohort they fall and settle at 0.40.">
+        <line x1="70" y1="370" x2="890" y2="370" stroke="#E8E9EA" stroke-width="1"/>
+        <line x1="70" y1="260" x2="890" y2="260" stroke="#E8E9EA" stroke-width="1" stroke-dasharray="1 5" stroke-linecap="round"/>
+        <line x1="70" y1="150" x2="890" y2="150" stroke="#E8E9EA" stroke-width="1" stroke-dasharray="1 5" stroke-linecap="round"/>
+        <line x1="70" y1="40" x2="890" y2="40" stroke="#E8E9EA" stroke-width="1" stroke-dasharray="1 5" stroke-linecap="round"/>
+        <text x="58" y="374" font-family="Inter" font-size="13" fill="#9AA0A4" text-anchor="end">0</text>
+        <text x="58" y="264" font-family="Inter" font-size="13" fill="#9AA0A4" text-anchor="end">0.4</text>
+        <text x="58" y="154" font-family="Inter" font-size="13" fill="#9AA0A4" text-anchor="end">0.8</text>
+        <text x="58" y="44" font-family="Inter" font-size="13" fill="#9AA0A4" text-anchor="end">1.2</text>
+        <rect x="70" y="40" width="180" height="330" fill="#F4F5F5"/>
+        <text x="160" y="150" font-family="Inter" font-size="13" font-weight="700" fill="#26292B" text-anchor="middle">0.6–0.7</text>
+        <text x="160" y="392" font-family="Inter" font-size="13" font-weight="600" fill="#9AA0A4" text-anchor="middle">before Autopilot</text>
+        <line x1="270" y1="40" x2="270" y2="370" stroke="#9AA0A4" stroke-width="1" stroke-dasharray="4 4"/>
+        <text x="278" y="56" font-family="Inter" font-size="13" font-weight="700" fill="#26292B">Autopilot gates live</text>
+        
+        <path d="M70.0,177.5 C85.0,181.2 100.0,188.5 115.0,188.5 C130.0,188.5 145.0,183.0 160.0,183.0 C175.0,183.0 190.0,195.8 205.0,199.5 C220.0,203.2 235.0,203.1 250.0,205.0 C256.7,205.9 263.3,206.8 270.0,207.8 C276.7,208.7 283.3,208.3 290.0,210.5 C304.3,215.1 318.6,224.2 332.9,232.5 C347.2,240.7 361.4,250.4 375.7,260.0 C390.0,269.6 404.3,281.1 418.6,290.2 C432.9,299.4 447.1,315.0 461.4,315.0 C475.7,315.0 490.0,278.4 504.3,278.4 C518.6,278.4 532.8,287.5 547.1,291.4 C561.4,295.2 575.7,298.3 590.0,301.2 C604.3,304.2 618.6,308.9 632.9,308.9 C647.2,308.9 661.4,287.5 675.7,287.5 C690.0,287.5 704.3,292.6 718.6,294.9 C732.9,297.2 747.1,299.3 761.4,301.2 C775.7,303.2 790.0,304.8 804.3,306.5 C818.6,308.1 832.8,311.1 847.1,311.1 C861.4,311.1 875.7,277.1 890.0,260.0" fill="none" stroke="#0F1011" stroke-width="2" stroke-linecap="round"/>
+        <circle cx="890" cy="260" r="4" fill="#fff" stroke="#0F1011" stroke-width="2"/>
+        <text x="884" y="246" font-family="Inter" font-size="14" font-weight="700" fill="#26292B" text-anchor="end">0.40</text>
+        <text x="580" y="392" font-family="Inter" font-size="13" font-weight="600" fill="#9AA0A4" text-anchor="middle">after Autopilot</text>
+      </svg>
+      <figcaption>Pre-Autopilot rate is a directional baseline from prior campaign records; post-gate figures are audited across 15 campaigns.</figcaption>
+    </figure>
+  </div>
+
+  <div class="prose">
+    <h2 id="framework">Don't ask if the agent can decide. Ask who decides today.</h2>
+    <p>Most AI workflow design stalls at the same spot: a step requires judgment, so a human gate goes in and gets called safety. I ask a different question first: <b>who is making this decision today?</b></p>
+    <p>Map every judgment call on two axes: how expensive is being wrong, and who handles it today — a critical thinker, or a routine worker following a pattern?</p>
+  </div>
+
+  <div class="wide">
+    <figure>
+      <div class="fig-title">Who makes the decision today?</div>
+      <div class="fig-sub">Every judgment call in a workflow, mapped before defaulting to a human gate</div>
+      <div class="matrix" style="margin-top:26px" role="img" aria-label="Two-by-two matrix: decisions made today by routine workers, or low-cost decisions, hand off to the agent; only high-cost decisions made by critical thinkers keep a human gate for now">
+        <div class="ax-y"><span>Cost of being wrong →</span></div>
+        <div class="quad q1 handoff">
+          <div class="verdict">Hand off</div>
+          <div class="who">High cost · routine worker</div>
+          <div class="why">The call is already being made on pattern, not judgment. The agent runs the same pattern on the same information — without fatigue or skimming.</div>
+        </div>
+        <div class="quad q2 keep">
+          <div class="verdict">Human gate — for now</div>
+          <div class="who">High cost · critical thinker</div>
+          <div class="why">The agent could likely match this too. The constraint here isn't capability — it's palatability. Instrument it, and let audit data earn the handoff.</div>
+        </div>
+        <div class="quad q3 handoff">
+          <div class="verdict">Hand off</div>
+          <div class="who">Low cost · routine worker</div>
+          <div class="why">The clearest case there is. Automating this is overdue.</div>
+        </div>
+        <div class="quad q4 handoff">
+          <div class="verdict">Hand off</div>
+          <div class="who">Low cost · critical thinker</div>
+          <div class="why">Skilled judgment on a cheap decision is wasted attention. Free the human for the calls that deserve them.</div>
+        </div>
+        <div class="ax-x">Skill of today's decision-maker →</div>
+      </div>
+    </figure>
+  </div>
+
+  <div class="prose">
+    <p>Three of the four quadrants are handoff candidates: the agent works from the same information the human had and can be assumed to decide at least as well. That holds in the fourth quadrant too — it's just less palatable, so it goes last. Which is why Autopilot's only mandatory human gate is the Go/No-Go. Everything below it was already being decided on pattern.</p>
+
+    <h2 id="trust">Designing processes for better customer experience</h2>
+    <p>Rewards that don't show up are the loyalty industry's most notorious trust killer. A customer shops, the affiliate network fails to track the transaction, and the user spends weeks chasing something nobody can see. It was a top driver of support volume and dissatisfaction.</p>
+    <p>We often can't resolve these quickly. Verification depends on the merchant and the network, takes weeks, and sometimes ends in a denial. What we could change was the wait. A customer who reports missing miles now sees <b>pending Max Miles in their balance immediately</b>. The miles aren't guaranteed — they can still be reversed if the transaction never validates — but the claim is visibly acknowledged instead of invisible.</p>
+    <p>The underlying process never got faster. Only the experience of waiting changed. Support workflows behind it (Intercom + n8n + OpenAI) handle triage and status so the queue doesn't reintroduce the silence.</p>
+  </div>
+
+  <div class="wide">
+    <figure>
+      <div class="statfig">
+        <div class="big">+10 pts</div>
+        <div class="cap">CSAT improvement, percentage points</div>
+      </div>
+    </figure>
+  </div>
+
+  <div class="prose">
+    <h2 id="checklist">Daily checklist and an ops on-call rotation to improve incident rates and response times</h2>
+    <p>By early 2025 the business had more surfaces than one person could hold: voucher inventory across partners, live campaigns, support escalations, redemption SLAs, wallet balances. We had alerting on all of it. Alerts were not the problem.</p>
+    <p>An alert competes with whatever you're already doing, and it usually loses. A wallet warning at 11am gets acknowledged, filed, and deferred behind something louder, and nothing distinguishes "seen and handled" from "seen and forgotten." Escalation was working as designed and still failing.</p>
+    <p>So in January 2025 we introduced a <b>daily ops checklist</b>: every key fulfilment surface checked and ticked off, every day, by a named owner. Not new detection — a forcing function on what we already had. An unchecked item is now visible as an unchecked item, not invisible as an unread notification.</p>
+    <p>The checklist handles what we can anticipate. What breaks at 9pm goes to a named <b>ops on-call rotation</b>, so one person is accountable for response instead of a channel where everyone assumes someone else has it.</p>
+    <p>Both have run every day since. <b>Incidents fell by roughly 40%</b>, and response times stopped depending on who happened to be looking.</p>
+  </div>
+
+  <div class="wide">
+    <figure>
+      <div class="statfig">
+        <div class="big">~40%</div>
+        <div class="cap">reduction in incidents since introducing the checklist and on-call rotation, Jan 2025</div>
+      </div>
+    </figure>
+  </div>
+
+  <div class="prose">
+    <p>It's the least sophisticated thing on this page and one of the highest-return. The failure wasn't a missing capability, so building more capability wouldn't have fixed it. Automating first would have added a system on top of a system and left the actual gap — attention, and accountability for it — untouched.</p>
+  </div>
+
+  <div class="wide">
+    <figure>
+      <div class="matrix" role="img" aria-label="Urgent and important is firefighting: automate the process to reduce frequency. Important and not urgent becomes monthly and quarterly goals. Urgent and not important goes to on-call. Not urgent and not important gets deleted.">
+        <div class="ax-y"><span>Important →</span></div>
+        <div class="quad q1 keep">
+          <div class="who">Important · not urgent</div>
+          <div class="why">Monthly / quarterly goals</div>
+        </div>
+        <div class="quad q2 handoff">
+          <div class="who">Important · urgent</div>
+          <div class="why">Firefighting — automate the process to reduce frequency</div>
+        </div>
+        <div class="quad q3 mute">
+          <div class="who">Not important · not urgent</div>
+          <div class="why">Delete</div>
+        </div>
+        <div class="quad q4 handoff">
+          <div class="who">Not important · urgent</div>
+          <div class="why">On-call</div>
+        </div>
+        <div class="ax-x">Urgent →</div>
+      </div>
+    </figure>
+  </div>
+
+  <div class="prose">
+    <h2>How this is built</h2>
+    <div class="cols">
+      <div class="col"><h4>Build</h4><p>Claude (agents, skills, MCP), n8n orchestration, Intercom + OpenAI support automation, Appsmith internal tools.</p></div>
+      <div class="col"><h4>Measure</h4><p>BigQuery/SQL. Every launch audited against launch records — defects confirmed, attributed, and published, escapes included.</p></div>
+      <div class="col"><h4>Operate</h4><p>Playbooks, validation gates, OKR baselines pulled from live systems. Five people, $5M+ GMV across vouchers, affiliate deals, and merchant escalations.</p></div>
+    </div>
+    <p>Before HeyMax: co-founded <b>Nook</b> (joint finance on a VISA debit card — $145K raised, partnerships with VISA, Chope, Booking.com) and drove the <b>GrabPay debit card launch in the Philippines</b> at Grab. Mechanical engineer by training (BITS Pilani), master's in IT in Business (SMU). I've run operations across Singapore, Hong Kong, and the Philippines, including HeyMax's Hong Kong expansion.</p>
+
+    <h2 id="next">Where to next</h2>
+    <p>The systems above were built inside one company. The harder problem is doing it repeatably — designing, building, evaluating, and launching agents that run real operations at scale. That's the work I want next.</p>
+    <div class="cta">
+      <h3>Let's talk</h3>
+      <p>If you're building AI agents for real businesses, or turning your own operations self-driving, I'd like to compare notes.</p>
+      <div class="btns">
+        <a class="btn primary" href="mailto:nairvinit14@gmail.com">Email me</a>
+        <a class="btn ghost" href="https://linkedin.com/in/vinitnair" target="_blank" rel="noopener">LinkedIn</a>
+      </div>
+    </div>
+  </div>
+</article>
+
+<footer>
+  <div class="foot-in">
+    <span>Vinit Nair · Singapore</span>
+    <span>Built with Claude.</span>
+  </div>
+</footer>
+
+</body>
+</html>
